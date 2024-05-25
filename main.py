@@ -22,6 +22,12 @@ def preprocess_eve_log(eve_log_file):
                     records.append(record)
             except json.JSONDecodeError as e:
                 print(f"Skipping invalid JSON line: {e}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+    if not records:
+        print("No valid records found.")
+        return pd.DataFrame()  # 返回空的DataFrame
 
     df = pd.DataFrame(records)
     df = df[['timestamp', 'src_ip', 'src_port', 'dest_ip', 'dest_port', 'proto', 'alert']]
@@ -30,6 +36,9 @@ def preprocess_eve_log(eve_log_file):
 
 
 df = preprocess_eve_log('/var/log/suricata/eve.json')
-df.to_csv('preprocessed_eve_log.csv', index=False)
+if not df.empty:
+    df.to_csv('preprocessed_eve_log.csv', index=False)
+else:
+    print("No data to save to CSV.")
 
 
