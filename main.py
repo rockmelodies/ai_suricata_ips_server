@@ -13,17 +13,15 @@ import pandas as pd
 
 
 def preprocess_eve_log(eve_log_file):
-    '''
-    提取suricata規則日志2
-    :param eve_log_file:
-    :return:
-    '''
     records = []
     with open(eve_log_file, 'r') as f:
         for line in f:
-            record = json.loads(line)
-            if 'alert' in record:
-                records.append(record)
+            try:
+                record = json.loads(line)
+                if 'alert' in record:
+                    records.append(record)
+            except json.JSONDecodeError as e:
+                print(f"Skipping invalid JSON line: {e}")
 
     df = pd.DataFrame(records)
     df = df[['timestamp', 'src_ip', 'src_port', 'dest_ip', 'dest_port', 'proto', 'alert']]
@@ -33,4 +31,5 @@ def preprocess_eve_log(eve_log_file):
 
 df = preprocess_eve_log('/var/log/suricata/eve.json')
 df.to_csv('preprocessed_eve_log.csv', index=False)
+
 
